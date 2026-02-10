@@ -1,0 +1,50 @@
+FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-devel
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# System dependencies (graphviz needed for dtreeviz/model visualization)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git openssh-client graphviz vim curl wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone course repo
+RUN git clone https://github.com/goosmanlei/fastai-course-part2.git /fastai-course-part2
+
+# Create venv and install packages
+RUN python -m venv /opt/fastai-venv
+
+ENV FASTAI_VENV=/opt/fastai-venv
+ENV PATH="$FASTAI_VENV/bin:$PATH"
+
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir \
+    torch torchvision torchaudio \
+    fastai fastcore fastdownload fastbook fastkaggle \
+    transformers tokenizers accelerate \
+    diffusers bitsandbytes peft safetensors \
+    timm \
+    matplotlib numpy pandas scipy scikit-learn \
+    seaborn plotly graphviz dtreeviz \
+    sympy networkx \
+    datasets sentencepiece \
+    gradio \
+    jupyterlab notebook ipykernel ipywidgets \
+    nbdev
+
+# Register venv as Jupyter kernel
+RUN python -m ipykernel install --name fastai --display-name "FastAI (venv)"
+
+# JupyterLab config (with RunPod proxy compatibility)
+RUN mkdir -p /root/.jupyter && \
+    echo "c.ServerApp.ip = '0.0.0.0'" >> /root/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.port = 8888" >> /root/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.allow_root = True" >> /root/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.token = ''" >> /root/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.allow_origin = '*'" >> /root/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.allow_remote_access = True" >> /root/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.disable_check_xsrf = True" >> /root/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.root_dir = '/fastai-course-part2'" >> /root/.jupyter/jupyter_lab_config.py
+
+EXPOSE 8888
+
+CMD ["jupyter", "lab"]
