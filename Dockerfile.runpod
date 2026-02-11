@@ -32,7 +32,7 @@ RUN python -m venv --system-site-packages $FASTAI_VENV && \
     npm install -g @anthropic-ai/claude-code
 
 # Layer 3: Clone course repo (placed late — repo updates won't invalidate package cache)
-RUN git clone https://github.com/goosmanlei/fastai-course-part2.git /fastai-course-part2
+RUN git clone https://github.com/goosmanlei/fastai-course-part2.git /root/fastai-course-part2
 
 # Layer 4: All configuration (matplotlib, Jupyter, git, shell)
 RUN mkdir -p /root/.config/matplotlib /root/.jupyter && \
@@ -45,7 +45,7 @@ RUN mkdir -p /root/.config/matplotlib /root/.jupyter && \
       echo "c.ServerApp.allow_origin = '*'"; \
       echo "c.ServerApp.allow_remote_access = True"; \
       echo "c.ServerApp.disable_check_xsrf = True"; \
-      echo "c.ServerApp.root_dir = '/fastai-course-part2'"; \
+      echo "c.ServerApp.root_dir = '/root/fastai-course-part2'"; \
     } > /root/.jupyter/jupyter_lab_config.py && \
     git config --global user.email "leiguoguo.ai@gmail.com" && \
     git config --global user.name "goosmanlei" && \
